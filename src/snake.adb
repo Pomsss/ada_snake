@@ -1,9 +1,13 @@
 package body Snake is
 
     procedure move(s : in out Snake) is
-        dequeue(s.Bod)
+    begin
+        Dequeue(s.Bod);
+        Enqueue(s.Bod, s.Head);
         s.Head.X = s.Head.X + S.Dx;
         s.Head.Y = s.Head.Y + S.Dy;
-    begin
-        
+    end;
+
+    
+    
 end Snake;

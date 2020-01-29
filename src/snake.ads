@@ -13,12 +13,11 @@ package Snake is
     type Snake is record
         Head  : Coord := (5, 5);
         Bod   : Snake_Body;
-        Len   : Snake_Len := 3;
         Dx    : Delt := -1;
         Dy    : Delt :=  0;
         Speed : Positive := 0;
     end record;
 
-    procedure move(s : in out Snake)
+    procedure move(s : in out Snake, a : in Apple);
 
 end Snake;
