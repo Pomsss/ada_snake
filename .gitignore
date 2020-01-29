@@ -1,5 +1,7 @@
 # Object file
 *.o
 
+env.sh
+
 # Ada Library Information
 *.ali
