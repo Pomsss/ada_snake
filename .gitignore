@@ -1,6 +1,8 @@
 # Object file
 *.o
 
+obj/
+
 env.sh
 
 # Ada Library Information
