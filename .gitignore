@@ -1,7 +1,9 @@
 # Object file
 *.o
-
 obj/
+
+# Tmp Emacs File
+*~
 
 env.sh
 
