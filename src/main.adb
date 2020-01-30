@@ -29,7 +29,8 @@ Procedure Main is
     package Random_Pos is new Ada.Numerics.Discrete_Random (RNG); use Random_Pos;
     G : Generator;
 
-
+    Period       : constant Time_Span := Milliseconds (500);
+    Next_Release : Time := Clock;
 
     function Bitmap_Buffer return not null Any_Bitmap_Buffer is
     begin
@@ -101,7 +102,6 @@ Procedure Main is
     end Set_Dir;
 
 begin
-
     Reset(G);
     --  Initialize LCD
     Display.Initialize;
@@ -121,17 +121,21 @@ begin
                Touched := (State (State'First).X, State (State'First).Y);
                Set_Dir(Player, Touched, Screen_Width, Screen_Height);           
             end if;
-            
-            Bitmap_Buffer.Set_Source (HAL.Bitmap.Black);
-            Bitmap_Buffer.Fill;
+        end;       
+        Bitmap_Buffer.Set_Source (HAL.Bitmap.Black);
+        Bitmap_Buffer.Fill;
 
-            Move(Player, Ate(Player, Apple), WIDTH, HEIGHT);
+        Move(Player, Ate(Player, Apple), WIDTH, HEIGHT);
+        
+        Draw(Player, Apple);
+        
+        Display.Update_Layers;
+
+        if not Is_Alive(Player) then
+            return;
+        end if;
             
-            Draw(Player, Apple);
-            
-            if not Is_Alive(Player) then
-                return;
-            end if;
-        end;
+        Next_Release := Next_Release + Period;
+        delay until Next_Release;
     end loop;
 end Main;
