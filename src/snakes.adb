@@ -9,17 +9,20 @@ package body Snakes is
     end Create_Snake;
 
 
-    function Move(S : in out Snake; Apple : Coord) return Boolean is
-        Ate : Boolean := False;
+    procedure Move(S : in out Snake; Ate : Boolean; Width : Integer; Height : Integer) is
     begin
-        if S.Head /= Apple then
+        if not Ate then
             Dequeue(S.Bod);
-            Ate := True;
         end if;
         Enqueue(S.Bod, S.Head);
         S.Head.X := S.Head.X + S.Dx;
         S.Head.Y := S.Head.Y + S.Dy;
-        return Ate;
+        if S.Head.X > Width then
+            S.Head.X := 0;
+        end if;
+        if S.Head.Y > Height then
+            S.Head.Y := 0;
+        end if;
     end Move;
 
     function Is_Alive(S : in Snake) return Boolean is

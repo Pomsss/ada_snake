@@ -12,7 +12,7 @@ package Snakes is
     end record;
 
     function Create_Snake return Snake;
-    function Move(S : in out Snake; Apple : Coord) return Boolean;
-    function Is_Alive(S : in Snake) return Boolean;
+    procedure Move(S: in out Snake; Ate: Boolean; Width : Integer; Height : Integer);
+    function Is_Alive(S: in Snake) return Boolean;
 
 end Snakes;
