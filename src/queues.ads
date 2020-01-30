@@ -12,16 +12,16 @@ package Queues is
       Next : Link;
    end record;
 
-   
+
    type Queue is record
       Head : Link;
       Tail : Link;
       Length : Natural := 0;
    end record;
-   
+
 
    function Is_Empty(Q: Queue) return Boolean;
-   
+
    function Is_Full(Q: Queue) return Boolean;
 
    function Size(Q: Queue) return Natural;
@@ -43,7 +43,7 @@ package Queues is
      Pre => not Is_Empty(Q),
      Post => Size(Q) = Size(Q)'Old - 1;
 
-  function Is_In_Queue(Q: Queue; Elt: Coord) return boolean;
+   function Is_In_Queue(Q: Queue; Elt: Coord) return Boolean;
 
 --private
 end Queues;

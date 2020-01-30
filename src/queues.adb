@@ -45,7 +45,7 @@ package body Queues is
 
    procedure Dequeue(Q: in out Queue) is
    begin
-      Q.Tail.Next := Q.Tail;
+      Q.Tail := Q.Tail.Next;
       Q.Length := Q.Length - 1;
    end Dequeue;
 
