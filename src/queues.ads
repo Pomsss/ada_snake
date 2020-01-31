@@ -33,7 +33,8 @@ package Queues is
      Pre => not Is_Empty(Q);
 
    procedure Reset(Q: in out Queue) with
-     Pre => not Is_Empty(Q);
+     Pre => not Is_Empty(Q),
+     Post => Is_Empty(Q);
 
    procedure Enqueue(Q: in out Queue; C: Coord) with
      Pre => not Is_Full(Q),
