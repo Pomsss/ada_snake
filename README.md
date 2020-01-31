@@ -17,25 +17,17 @@ Before you start you need to install:
     $ echo 'export PATH=<PATH>/GNAT/2019-arm-elf/bin:<PATH>/GNAT/2019/bin:$HOME/stlink/build/Release:<PATH>/stlink/build/Release/src/gdbserver:$PATH' > env.sh
     $ echo 'export GPR_PROJECT_PATH=<PATH>/Ada_Drivers_Library:$GPR_PROJECT_PATH' >> env.sh
     $ source flash.sh
-    
+
 Don't forget to download the Prerequisites and to plug the __*STM32F429I_Discovery*__!
 
 
 [-->Photo describing how it should look like.<--](https://i.imgur.com/X2yr1LU.jpg)
 
 ## Tests
-For this project we used contract for testing our code, the program should never crash.
+For this project we used contract in *.ads for testing our code, the program should never crash.
 
 ## Authors
 
 Pomes Hadrien\
 Nanouche Hamza\
 EPITA GISTRE
-
-
-
-
-
-
-
-
