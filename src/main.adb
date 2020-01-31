@@ -31,8 +31,8 @@ is
    Player : Snake := Create_Snake;
    Screen_Width : Natural;
    Screen_Height : Natural;
-
    Current_Score : Nat := 0;
+   Move_Count : Nat := 0;
 
    Period       : constant Time_Span := Milliseconds (50);
    Next_Release : Time := Clock;
@@ -44,11 +44,27 @@ is
    Apple : Coord := (Random(G) mod Screen_Width, Random(G) mod Screen_Height);
    Touched : Coord;
 
+   -- FUNCTION AND PROCEDURE DECLARATION
+   function Bitmap_Buffer return not null Any_Bitmap_Buffer with
+     Pre => Display.Hidden_Buffer (1).all in DMA2D_Bitmap_Buffer;
+
+   procedure Draw_Square(Pos : Coord; Color: Bitmap_Color) with
+     Pre => Pos.X <= Screen_Width and Pos.Y <= Screen_Height;
+
+   procedure Set_Dir(S : in out Snake; Pos : Coord; W : Integer; H : Integer) with
+     Pre => S.Dx = 0 or S.Dy = 0,
+     Post => S.Dy'Old /= S.Dy or S.Dx'Old /= S.Dx;
+
+   procedure Update_Apple_Pos(Apple: in out Coord) with
+     Post => Apple.X'Old /= Apple.X and Apple.Y'Old /= Apple.Y;
+
+   function Ate(S : Snake; Apple : in out Coord) return Boolean;
+   procedure Draw(S : Snake; Apple : Coord);
+
+
+   -- DEFINITION OF FUNCTIONS
    function Bitmap_Buffer return not null Any_Bitmap_Buffer is
    begin
-      if Display.Hidden_Buffer (1).all not in DMA2D_Bitmap_Buffer then
-         raise Program_Error with "We expect a DM2D buffer here";
-      end if;
       return Display.Hidden_Buffer(1);
    end Bitmap_Buffer;
 
@@ -84,12 +100,18 @@ is
       end if;
    end Set_Dir;
 
+   procedure Update_Apple_Pos(Apple: in out Coord) is
+   begin
+      Apple := (Random(G) mod Screen_Width, Random(G) mod Screen_Height);
+   end Update_Apple_Pos;
+
+
    function Ate(S : Snake; Apple : in out Coord) return Boolean is
       Head_Coord : Coord := Get_Head_Coord(S);
    begin
       if (Head_Coord.X > Apple.X - 15 and Head_Coord.X < Apple.X + 15) and
         (Head_Coord.Y > Apple.Y - 15 and  Head_Coord.Y < Apple.Y + 15) then
-         Apple := (Random(G) mod Screen_Width, Random(G) mod Screen_Height);
+         Update_Apple_Pos(Apple);
          Current_Score := Current_Score + 100;
          LCD_Std_Out.Clear_Screen;
          LCD_Std_Out.Put_Line("Score: " & Current_Score'Image);
@@ -98,7 +120,8 @@ is
       return False;
    end Ate;
 
-   procedure Draw(S : Snake; Apple : Coord) is
+   procedure Draw(S : Snake; Apple : Coord)
+   is
       C : Cell := S.Bod.Tail.all;
    begin
       Draw_Square(Apple, HAL.Bitmap.Red);
@@ -165,17 +188,22 @@ begin
          end if;
       end;
 
-      Move(Player, Ate(Player, Apple), Screen_Width, Screen_Height);
-      Draw(Player, Apple);
-      Display.Update_Layers;
-
-      if not Is_Alive(Player) then
-         return;
+      if Move_Count mod 3 = 0 then
+         Move(Player, Ate(Player, Apple), Screen_Width, Screen_Height);
+         Move_Count := 0;
       end if;
 
-      --  Update screen
-      Display.Update_Layer (1, Copy_Back => True);
-      Next_Release := Next_Release + Period;
 
+         Draw(Player, Apple);
+         Display.Update_Layers;
+         if not Is_Alive(Player) then
+            return;
+         end if;
+
+         --  Update screen
+         Display.Update_Layer (1, Copy_Back => True);
+         Next_Release := Next_Release + Period;
+
+         Move_Count := Move_Count + 1;
    end loop;
 end Main;

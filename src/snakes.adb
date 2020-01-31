@@ -14,7 +14,7 @@ package body Snakes is
     end Get_Head_Coord;
 
     procedure Move(S : in out Snake; Ate : Boolean; Width : Integer; Height : Integer) is
-       New_Coord : Coord := (Get_Head_Coord(S).X + S.Dx * 3, Get_Head_Coord(S).Y + S.Dy * 3);
+       New_Coord : Coord := (Get_Head_Coord(S).X + S.Dx * 20, Get_Head_Coord(S).Y + S.Dy * 20);
     begin
        if not Ate then
           Dequeue(S.Bod);

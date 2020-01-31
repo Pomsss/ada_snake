@@ -44,7 +44,8 @@ package Queues is
      Pre => not Is_Empty(Q),
      Post => Size(Q) = Size(Q)'Old - 1;
 
-   function Is_In_Queue(Q: Queue; Elt: Coord) return Boolean;
+   function Is_In_Queue(Q: Queue; Elt: Coord) return Boolean with
+     Pre => not Is_Empty(Q);
 
 --private
 end Queues;

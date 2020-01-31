@@ -11,8 +11,13 @@ package Snakes is
     end record;
 
     function Get_Head_Coord(S: Snake) return Coord;
-    function Create_Snake return Snake;
-    procedure Move(S: in out Snake; Ate: Boolean; Width : Integer; Height : Integer);
+    function Create_Snake return Snake with
+      Post => not Is_Empty(Create_Snake'Result.Bod) and Size(Create_Snake'Result.Bod) >= 2;
+
+    procedure Move(S: in out Snake; Ate: Boolean; Width : Integer; Height : Integer) with
+      Post => Get_Head_Coord(S).X /= Get_Head_Coord(S).X'Old
+      and Get_Head_Coord(S).Y /= Get_Head_Coord(S).Y'Old;
+
     function Is_Alive(S: in Snake) return Boolean;
 
 end Snakes;
