@@ -14,6 +14,7 @@ with BMP_Fonts;
 with LCD_Std_Out;
 with Ada.Real_Time; use Ada.Real_Time;
 with Ada.Numerics.Discrete_Random;
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 
 with Snakes; use Snakes;
 with Coords; use Coords;
@@ -21,15 +22,17 @@ with Queues; use Queues;
 
 procedure Main
 is
+   type Nat is range 0 .. Integer'Last;
+
    BG : Bitmap_Color := (Alpha => 255, others => 64);
    Ball_Pos   : Point := (20, 280);
 
    SQUARE_SIDE : Natural := 6;
-   --  WIDTH  : Natural := 17;
-   --  HEIGHT : Natural := 30;
    Player : Snake := Create_Snake;
    Screen_Width : Natural;
    Screen_Height : Natural;
+
+   Current_Score : Nat := 0;
 
    Period       : constant Time_Span := Milliseconds (50);
    Next_Release : Time := Clock;
@@ -38,7 +41,7 @@ is
    package Random_Pos is new Ada.Numerics.Discrete_Random (RNG); use Random_Pos;
    G: Generator;
 
-   Apple : Coord := (60, 160);--(Random(G) mod HEIGHT, Random(G) mod WIDTH);
+   Apple : Coord := (Random(G) mod Screen_Width, Random(G) mod Screen_Height);
    Touched : Coord;
 
    function Bitmap_Buffer return not null Any_Bitmap_Buffer is
@@ -55,11 +58,6 @@ is
    begin
       Bitmap_Buffer.Set_Source (Color);
       Bitmap_Buffer.Fill_Circle ((X mod Screen_Width, Y mod Screen_Height), 10);
-
-      --  Bitmap_Buffer.Set_Source(Color);
-      --  Bitmap_Buffer.Fill_Rect(( Position => (X, Y),
-      --                            Width    => SQUARE_SIDE,
-      --                            Height   => SQUARE_SIDE));
    end Draw_Square;
 
 
@@ -71,16 +69,16 @@ is
    begin
       In_Left_Triangle := H * (X - W) < (-Y) * W;
       In_Right_Triangle := H * X > W * Y;
-      if In_Right_Triangle and In_Left_Triangle then              -- up
+      if In_Right_Triangle and In_Left_Triangle and S.Dx /= 0 then              -- up
          S.Dx := 0;
          S.Dy := -1;
-      elsif In_Right_Triangle and not In_Left_Triangle then       -- right
+      elsif In_Right_Triangle and not In_Left_Triangle and S.Dy /= 0 then       -- right
          S.Dx := 1;
          S.Dy := 0;
-      elsif not In_Right_Triangle and In_Left_Triangle then       -- left
+      elsif not In_Right_Triangle and In_Left_Triangle and S.Dy /= 0 then       -- left
          S.Dx := -1;
          S.Dy := 0;
-      elsif not In_Right_Triangle and not In_Left_Triangle then   -- down
+      elsif not In_Right_Triangle and not In_Left_Triangle and S.Dx /= 0 then   -- down
          S.Dx := 0;
          S.Dy := 1;
       end if;
@@ -89,9 +87,12 @@ is
    function Ate(S : Snake; Apple : in out Coord) return Boolean is
       Head_Coord : Coord := Get_Head_Coord(S);
    begin
-      if Head_Coord.X > Apple.X - 20 and Head_Coord.X < Apple.X + 20 and
-        Head_Coord.Y > Apple.Y - 10 and Head_Coord.Y < Apple.Y + 20 then
+      if (Head_Coord.X > Apple.X - 15 and Head_Coord.X < Apple.X + 15) and
+        (Head_Coord.Y > Apple.Y - 15 and  Head_Coord.Y < Apple.Y + 15) then
          Apple := (Random(G) mod Screen_Width, Random(G) mod Screen_Height);
+         Current_Score := Current_Score + 100;
+         LCD_Std_Out.Clear_Screen;
+         LCD_Std_Out.Put_Line("Score: " & Current_Score'Image);
          return True;
       end if;
       return False;
@@ -135,18 +136,23 @@ begin
    Screen_Width  := Bitmap_Buffer.Width;
    Screen_Height := Bitmap_Buffer.Height;
 
-   LCD_Std_Out.Put_Line(Screen_Height'Image);
+   LCD_Std_Out.Put_Line("Score: " & Current_Score'Image);
+   Apple := (Random(G) mod Screen_Width, Random(G) mod Screen_Height);
+
    loop
       if User_Button.Has_Been_Pressed then
-         BG := HAL.Bitmap.Dark_Orange;
+
+         while not User_Button.Has_Been_Pressed loop
+            LCD_Std_Out.Put_Line("Game Paused !");
+            LCD_Std_Out.Clear_Screen;
+
+            null;
+         end loop;
+         LCD_Std_Out.Put_Line("Score: " & Current_Score'Image);
       end if;
 
       Display.Hidden_Buffer (1).Set_Source (BG);
       Display.Hidden_Buffer (1).Fill;
-
-      Display.Hidden_Buffer (1).Set_Source (HAL.Bitmap.Blue);
-      Display.Hidden_Buffer (1).Fill_Circle (Ball_Pos, 10);
-
 
       declare
          State : constant TP_State := Touch_Panel.Get_All_Touch_Points;
@@ -154,8 +160,6 @@ begin
          if State'Length = 1 then
             Touched := (State (State'First).X, State (State'First).Y);
             Set_Dir(Player, Touched, Screen_Width, Screen_Height);
-            Ball_Pos := (State (State'First).X, State (State'First).Y);
---            Move(Player, Ate(Player, Apple), Screen_Width, Screen_Height);
          else
             null;
          end if;
@@ -172,8 +176,6 @@ begin
       --  Update screen
       Display.Update_Layer (1, Copy_Back => True);
       Next_Release := Next_Release + Period;
---      delay until Next_Release;
-
 
    end loop;
 end Main;
